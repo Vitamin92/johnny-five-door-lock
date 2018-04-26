@@ -13,15 +13,15 @@ var app = express();
 app.listen(3000);
 
 //setup the ardunio for connection:
-var five = require( 'johnny-five' ),board,led,hall;
+var five = require( 'johnny-five' ),board,relay,hall;
 board = new five.Board();
    board.on("ready", function() {
 
-       led = new five.Led(10);
+       relay = new five.Relay(10);
        hall = new five.Sensor.Digital(2);
        console.log("board is ready");
-//     var relay = new five.Relay(10);
 
+       relay.close();
        });
 
 // view engine setup
@@ -39,14 +39,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 app.use('/users', users);
 
-//app.get request on /on triggers turning on the LED
+//app.get request on /on triggers turning on the Relay
 app.get('/on',function(req,res){
-    console.log("led on");
+    console.log("relay on");
     if(board.isReady && !hall.value){
-        led.on();
+        relay.open();
         setTimeout(() => {
-            led.toggle();
+            relay.toggle();
     }, 200);}
+    else {
+        relay.close();
+    }
+
     console.log("Lock is open");
     res.redirect('/');
 })
@@ -84,3 +88,4 @@ app.use(function(err, req, res, next) {
 
 
 module.exports = app;
+
